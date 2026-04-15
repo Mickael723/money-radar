@@ -1,0 +1,51 @@
+{
+  "exact_match": {
+    "netflix.com": "subscriptions",
+    "spotify usa": "subscriptions",
+    "hulu.com": "subscriptions",
+    "apple.com/bill": "subscriptions",
+    "target": "shopping",
+    "walmart": "shopping"
+  },
+  "regex_match": {
+    "subscriptions": [
+      "netflix", "spotify", "hulu", "disney\\s*plus", "hbo\\s*max", "prime\\s*video",
+      "apple\\s*one", "adobe.*creative", "peacock", "crunchyroll", "fubo.*tv",
+      "paramount", "youtube.*premium", "siriusxm", "patreon", "substack", "nytimes", "wsj"
+    ],
+    "food": [
+      "mcdonald", "doordash", "uber.*eats", "postmates", "grubhub", "starbucks",
+      "chipotle", "whole.*foods", "trader.*joe", "safeway", "kroger", "publix",
+      "wendy", "burger.*king", "taco.*bell", "domino", "pizza.*hut", "sweetgreen", "restaurant", "cafe"
+    ],
+    "gas": [
+      "chevron", "shell", "arco", "exxon", "mobil", "costco.*gas", "speedway",
+      "wawa", "quikTrip", "7-eleven", "gas", "fuel"
+    ],
+    "utilities": [
+      "socal.*edison", "at&t", "verizon", "t-mobile", "spectrum", "comcast",
+      "coned", "pge", "water.*and.*power", "trash.*service", "waste.*management", "utility"
+    ],
+    "shopping": [
+      "amazon", "target", "walmart", "best.*buy", "home.*depot", "lowe", 
+      "apple.*store", "costco.*wholesale", "cvs", "walgreens", "nike", "adidas", "mall", "store", "ikea"
+    ],
+    "health": [
+      "kaiser", "urgent.*care", "pharmacy", "cvs.*pharmacy", "walgreens.*pharm",
+      "quest.*diagnostics", "labcorp", "dental", "vision", "doctor", "clinic", "hospital", "medical"
+    ],
+    "travel": [
+      "uber", "lyft", "delta", "american.*airlines", "united.*airlines", 
+      "southwest", "airbnb", "marriott", "hilton", "expedia", "booking\\.com",
+      "parking", "tolls", "fasTrak", "ezpass", "hertz", "enterprise", "hotel", "motel", "transit"
+    ],
+    "entertainment": [
+      "steam", "ticketmaster", "amc", "regal", "cinemark", "playstation", 
+      "xbox", "nintendo", "livenation", "eventbrite", "movie", "theater", "gaming"
+    ],
+    "transfers": [
+      "zelle", "venmo", "cash.*app", "paypal", "transfer", "ach", "loan.*payment",
+      "mortgage", "car.*payment", "deposit", "withdrawal"
+    ]
+  }
+}
