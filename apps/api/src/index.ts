@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { authRouter } from './modules/auth';
 import { transactionRouter } from './modules/transactions';
+import { uploadRouter } from './modules/upload';
 
 const app = express();
 app.use(cors());
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use('/api/auth', authRouter);
 app.use('/api/transactions', transactionRouter);
+app.use('/api/upload', uploadRouter);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

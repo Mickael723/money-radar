@@ -9,6 +9,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import { useTransactionStore, Transaction } from '../store/transactionStore';
+import { Uploader } from './Uploader';
 import { Download } from 'lucide-react';
 import Papa from 'papaparse';
 
@@ -105,9 +106,11 @@ export function Ledger() {
   });
 
   return (
-    <div className="bg-white border text-sm rounded-xl shadow-sm p-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <input 
+    <div className="space-y-6">
+      <Uploader />
+      <div className="bg-white border text-sm rounded-xl shadow-sm p-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <input 
           type="text" 
           value={globalFilter ?? ''} 
           onChange={e => setGlobalFilter(e.target.value)}
@@ -168,6 +171,7 @@ export function Ledger() {
            </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }

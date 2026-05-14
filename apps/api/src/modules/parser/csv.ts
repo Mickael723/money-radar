@@ -14,7 +14,8 @@ export function parseCSV(fileBuffer: Buffer | string, filename: string): Transac
 
   const transactions: Transaction[] = [];
 
-  for (const row of records) {
+  for (const rawRow of records) {
+    const row = rawRow as Record<string, any>;
     const keys = Object.keys(row);
     
     // Find dynamic mapping

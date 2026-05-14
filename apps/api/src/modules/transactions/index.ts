@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../../prisma';
+import prisma from '../../prisma';
 import { authenticate } from '../../middleware/authenticate';
 
 const router = Router();
@@ -9,7 +9,7 @@ router.use(authenticate);
 router.get('/', async (req, res) => {
   try {
     const transactions = await prisma.transaction.findMany({
-      where: { userId: req.user!.id },
+      where: { statement: { userId: (req as any).user.id } },
       orderBy: { date: 'desc' },
       take: 200 // Limiting for UI performance in MVP
     });
@@ -31,8 +31,11 @@ router.patch('/:id', async (req, res) => {
     const { id } = req.params;
     const { category, tags } = req.body;
     
-    const tx = await prisma.transaction.findUnique({ where: { id } });
-    if (!tx || tx.userId !== req.user!.id) {
+    const tx = await prisma.transaction.findUnique({ 
+      where: { id },
+      include: { statement: true }
+    });
+    if (!tx || tx.statement.userId !== (req as any).user.id) {
       return res.status(404).json({ error: 'Transaction not found or unauthorized' });
     }
     
