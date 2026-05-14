@@ -1,22 +1,12 @@
 import { useMemo } from 'react';
 import { useTransactionStore } from '../store/transactionStore';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
-} from 'recharts';
 import { parseISO, format } from 'date-fns';
 import { TrendingUp, TrendingDown, DollarSign, Award } from 'lucide-react';
+import { MonthlyBarChart } from './charts/MonthlyBarChart';
+import { CategoryDonut } from './charts/CategoryDonut';
+import { TrendLineChart } from './charts/TrendLineChart';
 
-const COLORS = ['#064e3b', '#065f46', '#047857', '#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'];
+
 
 export function Dashboard() {
   const { transactions, isLoading } = useTransactionStore();
@@ -55,26 +45,40 @@ export function Dashboard() {
     };
   }, [transactions]);
 
-  const monthlyData = useMemo(() => {
-    const monthlyMap: Record<string, { month: string; income: number; spend: number }> = {};
+  const monthlyCategoryData = useMemo(() => {
+    const monthlyMap: Record<string, { month: string; [cat: string]: string | number }> = {};
+    const categories = new Set<string>();
     
     transactions.forEach(t => {
       try {
-        const dateObj = parseISO(t.date);
-        const monthKey = format(dateObj, 'MMM yyyy');
-        
-        if (!monthlyMap[monthKey]) {
-          monthlyMap[monthKey] = { month: monthKey, income: 0, spend: 0 };
+        if (t.amount < 0 && t.category !== 'transfers') {
+          const dateObj = parseISO(t.date);
+          const monthKey = format(dateObj, 'MMM yyyy');
+          
+          if (!monthlyMap[monthKey]) {
+            monthlyMap[monthKey] = { month: monthKey };
+          }
+          
+          const cat = t.category.toUpperCase();
+          categories.add(cat);
+          const current = (monthlyMap[monthKey][cat] as number) || 0;
+          monthlyMap[monthKey][cat] = current + Math.abs(t.amount);
         }
-        
-        if (t.amount > 0) monthlyMap[monthKey].income += t.amount;
-        else monthlyMap[monthKey].spend += Math.abs(t.amount);
       } catch (e) {
         // Fallback for invalid dates
       }
     });
 
-    return Object.values(monthlyMap).reverse();
+    // Rename month to date for trendline chart compatibility
+    const chartData = Object.values(monthlyMap).reverse().map(item => {
+      const { month, ...rest } = item;
+      return { month, date: month, ...rest };
+    });
+
+    return {
+      data: chartData,
+      categories: Array.from(categories)
+    };
   }, [transactions]);
 
   const categoryData = useMemo(() => {
@@ -139,23 +143,13 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Spending Bar Chart */}
         <div className="bg-white border border-emerald-100 rounded-xl p-6 shadow-sm h-96 flex flex-col">
-          <h3 className="font-semibold text-emerald-900 mb-6">Monthly Cash Flow</h3>
+          <h3 className="font-semibold text-emerald-900 mb-6">Monthly Cash Flow (Stacked)</h3>
           <div className="flex-1 min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#064e3b', fontSize: 12}} dy={10} />
-                <YAxis tickFormatter={(value) => `$${value}`} axisLine={false} tickLine={false} tick={{fill: '#064e3b', fontSize: 12}} />
-                <RechartsTooltip 
-                  cursor={{fill: '#f0fdf4'}} 
-                  contentStyle={{borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', color: '#064e3b'}}
-                  formatter={(value: number) => formatCurrency(value)}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="income" name="Income" fill="#34d399" radius={[4, 4, 0, 0]} barSize={30} />
-                <Bar dataKey="spend" name="Spend" fill="#047857" radius={[4, 4, 0, 0]} barSize={30} />
-              </BarChart>
-            </ResponsiveContainer>
+            {monthlyCategoryData.data.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-emerald-500">No spend data available.</div>
+            ) : (
+              <MonthlyBarChart data={monthlyCategoryData.data} categories={monthlyCategoryData.categories} />
+            )}
           </div>
         </div>
 
@@ -166,29 +160,22 @@ export function Dashboard() {
             {categoryData.length === 0 ? (
               <div className="absolute inset-0 flex items-center justify-center text-emerald-500">No spend data available.</div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={80}
-                    outerRadius={120}
-                    paddingAngle={2}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {categoryData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
-                  />
-                  <Legend layout="vertical" verticalAlign="middle" align="right" iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
+              <CategoryDonut data={categoryData} />
+            )}
+          </div>
+        </div>
+
+        {/* Trend Line Chart */}
+        <div className="bg-white border border-emerald-100 rounded-xl p-6 shadow-sm h-96 flex flex-col lg:col-span-2">
+          <h3 className="font-semibold text-emerald-900 mb-6">Category Trends</h3>
+          <div className="flex-1 min-h-0">
+            {monthlyCategoryData.data.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-emerald-500">No spend data available.</div>
+            ) : (
+              <TrendLineChart 
+                data={monthlyCategoryData.data as any} 
+                visibleCategories={monthlyCategoryData.categories} 
+              />
             )}
           </div>
         </div>
