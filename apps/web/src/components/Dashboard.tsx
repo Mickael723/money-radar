@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, DollarSign, Award } from 'lucide-react';
 import { MonthlyBarChart } from './charts/MonthlyBarChart';
 import { CategoryDonut } from './charts/CategoryDonut';
 import { TrendLineChart } from './charts/TrendLineChart';
+import { Budget } from './Budget';
 
 
 
@@ -138,6 +139,8 @@ export function Dashboard() {
           <p className="text-sm text-emerald-600 mt-1">{formatCurrency(kpis.topCategorySpend)}</p>
         </div>
       </div>
+
+      <Budget />
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
